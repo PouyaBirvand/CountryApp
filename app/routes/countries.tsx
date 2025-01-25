@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import type { Route } from "./+types/countries";
 import { useState } from "react";
 interface Country {
@@ -26,12 +26,35 @@ export async function clientLoader() {
 }
 
 export default function Countries({ loaderData = [] }: Route.ComponentProps) {
-  const [search, setSearch] = useState<string>("");
-  const [region, setRegion] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentSearch = searchParams.get('search') || '';
+  const currentRegion = searchParams.get('region') || '';
+
+  const handleSearchChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set('search', value);
+    } else {
+      params.delete('search');
+    }
+    setSearchParams(params);
+  };
+
+  const handleRegionChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set('region', value);
+    } else {
+      params.delete('region');
+    }
+    setSearchParams(params);
+  };
 
   const FilteredCountries = loaderData.filter((country: Country) => {
-    const matchesRegion = !region || country.region.toLowerCase().includes(region.toLowerCase());
-    const matchesSearch = !search || country.name.common.toLowerCase().includes(search.toLowerCase());
+    const matchesRegion = !currentRegion ||
+      country.region.toLowerCase().includes(currentRegion.toLowerCase());
+    const matchesSearch = !currentSearch ||
+      country.name.common.toLowerCase().includes(currentSearch.toLowerCase());
     return matchesSearch && matchesRegion;
   });
 
@@ -48,14 +71,14 @@ export default function Countries({ loaderData = [] }: Route.ComponentProps) {
               type="text"
               placeholder="Search countries..."
               className="w-full bg-black/40 px-4 py-3 rounded-lg border border-indigo-500/20 focus:border-indigo-500/50 outline-none text-white placeholder-indigo-400/50 transition-all"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={currentSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
 
           <select
-            onChange={(e) => setRegion(e.target.value)}
-            value={region}
+            onChange={(e) => handleRegionChange(e.target.value)}
+            value={currentRegion}
             className="bg-black/40 px-4 py-3 rounded-lg border border-indigo-500/20 focus:border-indigo-500/50 outline-none text-white transition-all cursor-pointer"
           >
             <option value="">All Regions</option>
@@ -69,10 +92,12 @@ export default function Countries({ loaderData = [] }: Route.ComponentProps) {
       </div>
 
       {FilteredCountries.length === 0 ? (
-        <div className="text-center text-gray-400 py-12">No countries match your filters</div>
+        <div className="text-center text-gray-400 py-12">
+          No countries match your filters
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FilteredCountries.map((country: any, key: number) => (
+          {FilteredCountries.map((country: Country, key: number) => (
             <Link
               to={`/countries/${country.name.common}`}
               key={key}
