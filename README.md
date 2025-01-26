@@ -2,7 +2,7 @@
 
 A cutting-edge web application built with the latest React technologies to explore countries worldwide. This project showcases modern web development practices and powerful features for an exceptional user experience.
 
-![CountryApp Preview](preview.gif)
+![CountryApp Preview](https://s8.uupload.ir/files/capture_aedc.png)
 
 ## 🛠️ Tech Stack
 
